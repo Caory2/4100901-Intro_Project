@@ -110,7 +110,7 @@ int main(void)
   // Habilitar la recepción UART por interrupción por primera vez
   HAL_UART_Receive_IT(&huart2, &rx_data, 1);
 
-  // Mensaje de bienvenida por UART
+  // Mensaje de bienvenida por UART-------------------------------------------------ACA INICIA
   char *welcome_msg = "Sistema de Control Basico - Listo\r\n";
   HAL_UART_Transmit(&huart2, (uint8_t*)welcome_msg, strlen(welcome_msg), 100);
 
@@ -125,23 +125,38 @@ int main(void)
     /* USER CODE BEGIN 3 */
     // ---- Heartbeat LED ----
     static uint32_t last_heartbeat_time = 0;
-    if (HAL_GetTick() - last_heartbeat_time >= 500) // Cada 500 ms
+    static uint32_t tiempo = 1000;
+    static uint32_t estado = 0; 
+
+
+    if (HAL_GetTick() - last_heartbeat_time >= tiempo) // Cada 500 ms  //Realice algo cada cierto tiempo
     {
-      HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin); // Cambia el estado del LED LD2
+      HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin); // Cambia el estado del LED LD2   //Cambiar el estado de un pin
       last_heartbeat_time = HAL_GetTick();
     }
 
     // ---- Procesamiento del Botón ----
     if (button_flag == 1)
     {
+      if (estado==0){
+        estado=1;
+        tiempo=50;
+      }
+      else{
+        estado=0;
+        tiempo=1000;
+      }
+      
+      
+
       // 1. Encender LED Externo
       HAL_GPIO_WritePin(LED_EXT_GPIO_Port, LED_EXT_Pin, GPIO_PIN_SET); // Enciende LED_EXT
 
-      // 2. Calcular cuándo apagarlo (3 segundos desde ahora)
-      led_ext_off_time = HAL_GetTick() + 3000;
+      // 2. Calcular cuándo apagarlo (5 segundos desde ahora)
+      led_ext_off_time = HAL_GetTick() + 5000;
 
       // 3. Enviar mensaje por UART
-      sprintf(tx_buffer, "Boton B1 presionado! LED EXT ON.\r\n");
+      sprintf(tx_buffer, "LED EXT ON, LED INT PARPADEA MAS RAPIDO.\r\n");  //Asigna nuevo valor al buffer
       HAL_UART_Transmit(&huart2, (uint8_t*)tx_buffer, strlen(tx_buffer), 100);
 
       // 4. Limpiar el flag
